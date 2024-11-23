@@ -1,4 +1,4 @@
-fp = "/Users/nkossally/Documents/GitHub/project_euler/src/11_data.txt"
+fp = "/Users/nkossally/Documents/GitHub/project_euler/11_data.txt"
 def convert_to_int(string):
     return int(string)
 def make_matrix():
