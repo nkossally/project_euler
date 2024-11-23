@@ -1,19 +1,23 @@
 const getLatticePathCount = () =>{
-    let count = 0
+    const dp = []
 
-    const helper = (x, y) =>{
-        if(x === 20 && y === 20){
-            count++
-            return
-        }
-        if(x < 20){
-            helper(x + 1, y)
-        }
-        if(y < 20){
-            helper(x, y + 1)
+    for(let i = 0; i <= 20; i++){
+        dp.push([])
+        for(let j = 0; j <= 20; j++){
+            if(i === 0 && j === 0){
+                dp[i][j] = 0
+            } else if(i === 0){
+                dp[0][j] = 1;
+            } else if(j === 0) {
+                dp[i][0] = 1
+            } else {
+                dp[i][j] = dp[i -1][j] + dp[i][j - 1]
+            }
+
         }
     }
-    helper(0, 0)
-    return count
+    console.log(dp)
+
+    return dp[20][20]
 }
 console.log(getLatticePathCount())
