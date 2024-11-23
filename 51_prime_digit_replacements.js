@@ -1,5 +1,15 @@
 const badNums = new Set()
+const primes = []
+const SIZE_OF_FAMILY = 8;
 const getIsPrime = num =>{
+    for(let i = 0; i < primes.length; i++){
+        if(num % primes[i] === 0) return false
+
+    }
+    primes.push(num)
+    return true;
+}
+const getIsPrime_v2 = num =>{
     let i = Math.floor(num / 2)
     while(i > 1){
         if(num % i === 0) return false
@@ -39,7 +49,7 @@ const tryNReplacements = (num, n) => {
         const idx = strSoFar.length
         if(strSoFar.length === numStr.length){
             const parsed = parseInt(strSoFar)
-            if(getIsPrime(parsed)){
+            if(getIsPrime_v2(parsed)){
                 family.push(parsed)
             }
             return
@@ -67,12 +77,11 @@ const tryNReplacements = (num, n) => {
             family = [];
             const indices = indicesCollection[j];
             helper(indices, "", undefined);
-            // console.log("family", family)
             family.forEach(num =>{
                 badNums.add(num)
             })
 
-            if(family.length === 8){
+            if(family.length === SIZE_OF_FAMILY){
                 return true;
             }
         }
@@ -90,20 +99,19 @@ const hasFamilyOfEight = (num) => {
     return false;
 }
 
-const getSmallestPrimeWithEightReplacements = () =>{
-    let num = 221000;
+const getSmallestPrimeWithEightReplacements = () => {
+  let num = 2;
 
-    // let num = 11;
 
-    while(true){
-        if(!badNums.has(num) && getIsPrime(num)){
-            // console.log(num)
-            if(hasFamilyOfEight(num)){
-                return num
-            }
-        }
-        num++
+  while (true) {
+    if (getIsPrime(num)) {
+      // console.log(num)
+      if (hasFamilyOfEight(num)) {
+        return num;
+      }
     }
-}
+    num++;
+  }
+};
 
 console.log(getSmallestPrimeWithEightReplacements())
