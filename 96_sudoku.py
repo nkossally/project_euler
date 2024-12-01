@@ -182,7 +182,7 @@ def check_cols(board):
                 board[rows[0]][col] = num
 
 def check_sub_squares(board):
-    three_indices = [0, 1, 2]
+    three_indices = [0, 3, 6]
     for top_row in three_indices:
         for top_col in three_indices:
             num_to_indices = get_num_to_indices()
