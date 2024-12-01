@@ -3,44 +3,49 @@ import copy
 
 BOARD_SIZE = 9
 
-COUNT_LIMIT = 60
+COUNT_LIMIT = 100
 
 def solve_sudoku_boards():
     boards = getSudokuBoards()
     sum = 0
-    continue_solving = True
-    count = 0
 
-    while continue_solving and count < COUNT_LIMIT:
-        continue_solving = False
-        count += 1
-        sum = 0
+    for i in range(len(boards)):
+        board = boards[i]
 
-        for i in range(len(boards)):
-            board = boards[i]
-
-            check_cols(board)
-            check_rows(board)
-            check_sub_squares(board)
-            check_cols_v2(board)
-            check_rows_v2(board)
+        check_cols_rows_and_sub_squares(board)
 
 
-            if no_zeros(board):
-                sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
-            else:
-                continue_solving = True
-                if count == COUNT_LIMIT:
-                    print("adding nothing")
+        if no_zeros(board):
+            sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
+        else:
+            print("adding nothing")
       
-    # for i in range(len(boards)):
-    #     board = boards[i]
-    #     result = solve_board_recursion(board, 0)
-    #     if result:
-    #         boards[i] = result
-    #         sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
+    for i in range(len(boards)):
+        board = boards[i]
+        if no_zeros(board):
+            sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
+            print(sum)
+        else:
+            print("unsolved")
+            result = solve_board_recursion(board, 0)
+            if result:
+                boards[i] = result
+                sum += 100 * boards[i][0][0] + 10 * boards[i][0][1] + boards[i][0][2]
+            else:
+                print("could not solve")
     print(boards)
     return sum
+
+def check_cols_rows_and_sub_squares(board):
+    made_change = check_cols(board)
+    made_change = made_change or check_rows(board)
+    made_change = made_change or check_sub_squares(board)
+    made_change = made_change or check_cols_v2(board)
+    made_change = made_change or check_rows_v2(board)
+
+    if made_change:
+        check_cols_rows_and_sub_squares(board)
+
 
 def to_num(str):
     return int(str)
@@ -143,6 +148,7 @@ def check_rows(board):
                 board[row][cols[0]]= num
 
 def check_rows_v2(board):
+    made_change = False
     for row in range(BOARD_SIZE):
         num_to_indices = get_num_to_indices()
         for col in range(BOARD_SIZE):
@@ -155,8 +161,12 @@ def check_rows_v2(board):
                 row = indices[0][0]
                 col = indices[0][1]
                 board[row][col] = num
+                made_change = True
+    return made_change
 
 def check_cols_v2(board):
+    made_change = False
+
     for col in range(BOARD_SIZE):
         num_to_indices = get_num_to_indices()   
         for row in range(BOARD_SIZE):
@@ -169,9 +179,12 @@ def check_cols_v2(board):
                 row = indices[0][0]
                 col = indices[0][1]
                 board[row][col] = num
+                made_change = True
+    return made_change
 
 
 def check_cols(board):
+    made_change = False
     for col in range(BOARD_SIZE):
         for num in range(1, BOARD_SIZE + 1):
             rows = []
@@ -180,8 +193,11 @@ def check_cols(board):
                     rows.append(row)
             if len(rows) == 1:
                 board[rows[0]][col] = num
+                made_change = True
+    return made_change
 
 def check_sub_squares(board):
+    made_change = False
     three_indices = [0, 3, 6]
     for top_row in three_indices:
         for top_col in three_indices:
@@ -199,28 +215,38 @@ def check_sub_squares(board):
                     row  = num_to_indices[num][0][0]
                     col  = num_to_indices[num][0][1]
                     board[row][col] = num
-
+                    made_change = True
+    return made_change
 
 
 def solve_board_recursion(board, count):
     if no_zeros(board):
         return board
-    if count > 10:
+    if count > 150:
         return False
-    for i in range(3):
-        check_rows(board)
-        check_cols(board)
-        check_sub_squares(board)
+
     for row in range(BOARD_SIZE):
+        shortest  = float('inf')
+        min_nums = None
+        coordinates = None
         for col in range(BOARD_SIZE):
             if board[row][col] == 0:
                 nums = get_nums_that_can_be_placed(board, row, col)
-                for num in nums:
-                    new_board = copy.deepcopy(board)
-                    new_board[row][col] = num
-                    result = solve_board_recursion(new_board, count + 1)
-                    if result:
-                        return result
+                if len(nums) == 0:
+                    return False
+                if len(nums) < shortest:
+                    min_nums = nums
+                    shortest = len(nums)
+                    coordinates = [row, col]
+    if not min_nums:
+        return
+    for num in min_nums:
+        new_board = copy.deepcopy(board)
+        new_board[coordinates[0]][coordinates[1]] = num
+        check_cols_rows_and_sub_squares(new_board)
+        result = solve_board_recursion(new_board, count + 1)
+        if result:
+            return result
 
             
     return False
