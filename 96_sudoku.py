@@ -1,27 +1,38 @@
 import math
+import copy
 
 BOARD_SIZE = 9
 
-def get_board():
-    board = []
-    for i in range(BOARD_SIZE):
-        row = []
-        for j in range(BOARD_SIZE):
-            row.append([])
-        board.append(row)
-    return board
+def solve_sudoku_boards():
+    boards = getSudokuBoards()
+    sum = 0
+    continue_solving = True
+    count = 0
 
-def get_column(board, col):
-    arr = []
-    for i in range(len(board)):
-        arr.append(board[i][col])
-    return arr
+    # while continue_solving and count < 20:
+    #     continue_solving = False
+    #     count += 1
+    #     sum = 0
 
-def get_num_to_indices():
-    num_to_indices = {}
-    for i in range(1, BOARD_SIZE + 1):
-        num_to_indices[i] = []
-    return num_to_indices
+    #     for i in range(len(boards)):
+    #         board = boards[i]
+
+    #         board_sum = solve_board(board)
+            # if board_sum == 0:
+            #     if count == 1000:
+            #         print("adding nothing")
+            #     continue_solving = True
+            # else:
+            #     sum += board_sum
+
+    for i in range(len(boards)):
+        board = boards[i]
+        result = solve_board_recursion(board, 0)
+        if result:
+            boards[i] = result
+            sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
+    print(boards)
+    return sum
 
 def to_num(str):
     return int(str)
@@ -48,82 +59,17 @@ def getSudokuBoards():
 
     return boards
 
-def process_square(board, i, j, possibilities):
-    nums = list(range(1, BOARD_SIZE + 1))
-
-    for row in range(i, i + 3):
-        for col in range(j, j + 3 ):
-            val = board[row][col]
-            if val in nums:
-                nums.remove(val)
-    
-    for row in range(i, i + 3):
-        for col in range(j, j + 3 ):
-            if board[row][col] == 0:
-                valid_nums_for_block = nums.copy()
-                for k in range(BOARD_SIZE):
-                    val_1 = board[row][k]
-                    val_2 = board[k][col]
-                    if val_1 in valid_nums_for_block:
-                        valid_nums_for_block.remove(val_1)
-                    if val_2 in valid_nums_for_block:
-                        valid_nums_for_block.remove(val_2)
-                if len(valid_nums_for_block) == 1:
-                    board[row][col] = valid_nums_for_block[0]
-                    remove_num_from_possibilities( valid_nums_for_block[0], possibilities, row, col)
-                    nums.remove(valid_nums_for_block[0])
-                else:
-                    possibilities[row][col] = valid_nums_for_block
-    
-    num_to_indices = get_num_to_indices()
-
-    for row in range(i, i + 3):
-        for col in range(j, j + 3 ):
-            if possibilities[row][col]:
-                for num in possibilities[row][col]:
-                    if not num_to_indices[num]:
-                        num_to_indices[num] = []
-                    num_to_indices[num].append([row, col])
-
-
-    for num in nums:
-        possible_indices = num_to_indices[num]
-        print("possible_indices")
-        print(possible_indices)
-        for idx in range(BOARD_SIZE):
-            idx_row_indices =  list(filter(lambda indices: indices[0] == idx, possible_indices))
-            # print("num")
-            # print(num)
-            # print("idx")
-            # print(idx)
-            # print("filter")
-            # print(idx_row_indices)
-            if len(idx_row_indices) == 1:
-                row = idx_row_indices[0][0]
-                col = idx_row_indices[0][1]
-                board[row][col] = num
-                num_to_indices[num].remove([row, col])
-                remove_num_from_possibilities(num, possibilities, row, col)
-        for idx in range(BOARD_SIZE):
-            idx_col_indices =  list(filter(lambda indices: indices[1] == idx, possible_indices))
-            print(idx_col_indices)
-            if len(idx_col_indices) == 1:
-                row = idx_col_indices[0][0]
-                col = idx_col_indices[0][1]
-                board[row][col] = num
-                num_to_indices[num].remove([row, col])
-                remove_num_from_possibilities(num, possibilities, row, col)
-    print(board)
-    print(possibilities)
-    print(num_to_indices)
-
 def solve_board(board):
-    possibilities = get_board()
 
-    for i in range(0, BOARD_SIZE, 3):
-        for j in range(0, BOARD_SIZE, 3):
-            process_square(board, i, j, possibilities)
-    evaluate_rows_and_cols(board, possibilities)
+    for i in range(BOARD_SIZE):
+        for j in range(BOARD_SIZE):
+            nums = get_nums_that_can_be_placed(board, i, j)
+            if len(nums) == 1:
+                board[i][j] = nums[0]
+    
+    check_rows(board)
+    check_cols(board)
+    check_sub_squares(board)
 
     # return True if there is a zero on the subsquare
     for row in range(BOARD_SIZE):
@@ -132,80 +78,120 @@ def solve_board(board):
                 return 0
     return 100 * board[0][0] + 10 * board[0][1] + board[0][2]
 
-def remove_num_from_possibilities(num, possibilities, i, j):
-    possibilities[i][j] = []
-    for row in range(BOARD_SIZE):
-        if num in possibilities[row][j]:
-            possibilities[row][j].remove(num)
-    for col in range(BOARD_SIZE):
-        if num in possibilities[i][col]:
-            possibilities[i][col].remove(num)
-    
-def evaluate_rows_and_cols(board, possibilities):
-    for i in range(BOARD_SIZE):
-        num_to_indices = get_num_to_indices()
-        for j in range(BOARD_SIZE):
-            if board[i][j] == 0:
-                for num in possibilities[i][j]:
-                    num_to_indices[num].append([i, j])
-        for num, indices in num_to_indices.items():
-            row = indices[0][0]
-            col = indices[0][1]
-            if len(indices) == 1 and num not in board[row]:
-
-                board[row][col] = num
-                remove_num_from_possibilities(num, possibilities, row, col)
-
-    # look at columns
-    for i in range(BOARD_SIZE):
-        num_to_indices = get_num_to_indices()
-        for j in range(BOARD_SIZE):
-            if board[j][i] == 0:
-                for num in possibilities[j][i]:
-                    num_to_indices[num].append([j, i])
-        for num, indices in num_to_indices.items():
-            row = indices[0][0]
-            col = indices[0][1]
-            if len(indices) == 1  and num not in board[row]:
-
-                board[row][col] = num
-                remove_num_from_possibilities(num, possibilities, row, col)
-
-
-    return
-
 def get_nums_that_can_be_placed(board, i, j):
     if board[i][j] != 0:
         return []
-    nums = []
+    nums = list(range(1, BOARD_SIZE + 1))
     top_left_row = math.floor(i / 3)
-    top_left_col = math.floor(j, 3)
-    for num in range(1, BOARD_SIZE + 1):
-        
+    top_left_col = math.floor(j / 3)
 
-def solve_sudoku_boards():
-    boards = getSudokuBoards()
-    sum = 0
-    continue_solving = True
-    count = 0
+    for i in range(top_left_row, top_left_row + 3):
+        for j in range(top_left_col, top_left_col + 3):
+            if board[i][j] in nums:
+                nums.remove(board[i][j])
+    
+    row = board[i]
+    col = get_column(board, j)
+    for num in row:
+        if num in nums:
+            nums.remove(num)
 
-    while continue_solving and count < 100:
-        continue_solving = False
-        count += 1
-        sum = 0
+    for num in col:
+        if num in nums:
+            nums.remove(num)
 
-        for i in range(len(boards)):
-            board = boards[i]
+    return nums
 
-            board_sum = solve_board(board)
-            if board_sum == 0:
-                if count == 1000:
-                    print("adding nothing")
-                continue_solving = True
-            else:
-                sum += board_sum
 
-    print(boards)
-    return sum
+def get_board():
+    board = []
+    for i in range(BOARD_SIZE):
+        row = []
+        for j in range(BOARD_SIZE):
+            row.append([])
+        board.append(row)
+    return board
+
+def get_column(board, col):
+    arr = []
+    for i in range(len(board)):
+        arr.append(board[i][col])
+    return arr
+
+def get_num_to_indices():
+    num_to_indices = {}
+    for i in range(1, BOARD_SIZE + 1):
+        num_to_indices[i] = []
+    return num_to_indices
+
+def check_rows(board):
+    for row in range(BOARD_SIZE):
+        for num in range(1, BOARD_SIZE + 1):
+            cols = []
+            for col in range(BOARD_SIZE):
+                if num in get_nums_that_can_be_placed(board, row, col):
+                    cols.append(col)
+            if len(cols) == 1:
+                board[row][cols[0]]= num
+
+def check_cols(board):
+    for col in range(BOARD_SIZE):
+        for num in range(1, BOARD_SIZE + 1):
+            rows = []
+            for row in range(BOARD_SIZE):
+                if num in get_nums_that_can_be_placed(board, row, col):
+                    rows.append(row)
+            if len(rows) == 1:
+                board[rows[0]][col] = num
+
+def check_sub_squares(board):
+    for top_row in range(3):
+        for top_col in range(3):
+            num_to_indices = get_num_to_indices()
+            
+            for i in range(3):
+                for j in range(3):
+                    nums = get_nums_that_can_be_placed(board, top_row + i, top_col + j )
+                    for num in nums:
+                        num_to_indices[num].append([top_row + i, top_col + j])
+
+            nums = list(range(1, BOARD_SIZE + 1))
+            for num in nums:
+                if len(num_to_indices[num]) == 1:
+                    row  = num_to_indices[num][0][0]
+                    col  = num_to_indices[num][0][1]
+                    board[row][col] = num
+
+
+
+def solve_board_recursion(board, count):
+    if no_zeros(board):
+        return board
+    if count > 10:
+        return False
+    for i in range(3):
+        check_rows(board)
+        check_cols(board)
+        check_sub_squares(board)
+    for row in range(BOARD_SIZE):
+        for col in range(BOARD_SIZE):
+            if board[row][col] == 0:
+                nums = get_nums_that_can_be_placed(board, row, col)
+                for num in nums:
+                    new_board = copy.deepcopy(board)
+                    new_board[row][col] = num
+                    result = solve_board_recursion(new_board, count + 1)
+                    if result:
+                        return result
+
+            
+    return False
+
+def no_zeros(board):
+    for row in range(BOARD_SIZE):
+        for col in range(BOARD_SIZE):
+            if board[row][col] == 0:
+                return False
+    return True
 
 print(solve_sudoku_boards())
