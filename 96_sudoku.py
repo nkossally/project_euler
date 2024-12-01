@@ -3,7 +3,7 @@ import copy
 
 BOARD_SIZE = 9
 
-COUNT_LIMIT = 100
+COUNT_LIMIT = 60
 
 def solve_sudoku_boards():
     boards = getSudokuBoards()
@@ -90,8 +90,8 @@ def get_nums_that_can_be_placed(board, i_arg, j_arg):
     if board[i_arg][j_arg] != 0:
         return []
     nums = list(range(1, BOARD_SIZE + 1))
-    top_left_row = math.floor(i_arg / 3)
-    top_left_col = math.floor(j_arg / 3)
+    top_left_row = math.floor(i_arg / 3) * 3
+    top_left_col = math.floor(j_arg / 3) * 3
 
     for i in range(top_left_row, top_left_row + 3):
         for j in range(top_left_col, top_left_col + 3):
@@ -107,10 +107,6 @@ def get_nums_that_can_be_placed(board, i_arg, j_arg):
     for num in col:
         if num in nums:
             nums.remove(num)
-
-    # print("get_nums_that_can_be_placed", i_arg, j_arg)
-    # print(nums)
-    # print(board)
 
     return nums
 
@@ -141,7 +137,7 @@ def check_rows(board):
         for num in range(1, BOARD_SIZE + 1):
             cols = []
             for col in range(BOARD_SIZE):
-                if num in get_nums_that_can_be_placed(board, row, col):
+                if num in get_nums_that_can_be_placed(board, row, col) and col not in cols:
                     cols.append(col)
             if len(cols) == 1:
                 board[row][cols[0]]= num
@@ -153,7 +149,7 @@ def check_rows_v2(board):
             nums = get_nums_that_can_be_placed(board, row, col)
             for num in nums:
                 num_to_indices[num].append([row, col])
-    
+
         for num, indices in num_to_indices.items():
             if len(indices) == 1:
                 row = indices[0][0]
@@ -180,7 +176,7 @@ def check_cols(board):
         for num in range(1, BOARD_SIZE + 1):
             rows = []
             for row in range(BOARD_SIZE):
-                if num in get_nums_that_can_be_placed(board, row, col):
+                if num in get_nums_that_can_be_placed(board, row, col) and row not in rows:
                     rows.append(row)
             if len(rows) == 1:
                 board[rows[0]][col] = num
