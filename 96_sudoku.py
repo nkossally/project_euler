@@ -9,21 +9,21 @@ def solve_sudoku_boards():
     boards = getSudokuBoards()
     sum = 0
 
-    for i in range(len(boards)):
-        board = boards[i]
+    # for i in range(len(boards)):
+    #     board = boards[i]
 
-        check_cols_rows_and_sub_squares(board)
+    #     check_cols_rows_and_sub_squares(board)
 
 
-        if no_zeros(board):
-            sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
-        else:
-            print("adding nothing")
+    #     if no_zeros(board):
+    #         sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
+    #     else:
+    #         print("adding nothing")
       
     for i in range(len(boards)):
         board = boards[i]
         if no_zeros(board):
-            sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
+            # sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
             print(sum)
         else:
             print("unsolved")
@@ -222,8 +222,10 @@ def check_sub_squares(board):
 def solve_board_recursion(board, count):
     if no_zeros(board):
         return board
-    if count > 150:
+    if count > 1600:
         return False
+
+    # check_cols_rows_and_sub_squares(board)
 
     for row in range(BOARD_SIZE):
         shortest  = float('inf')
