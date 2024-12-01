@@ -3,34 +3,42 @@ import copy
 
 BOARD_SIZE = 9
 
+COUNT_LIMIT = 100
+
 def solve_sudoku_boards():
     boards = getSudokuBoards()
     sum = 0
     continue_solving = True
     count = 0
 
-    # while continue_solving and count < 20:
-    #     continue_solving = False
-    #     count += 1
-    #     sum = 0
+    while continue_solving and count < COUNT_LIMIT:
+        continue_solving = False
+        count += 1
+        sum = 0
 
-    #     for i in range(len(boards)):
-    #         board = boards[i]
+        for i in range(len(boards)):
+            board = boards[i]
 
-    #         board_sum = solve_board(board)
-            # if board_sum == 0:
-            #     if count == 1000:
-            #         print("adding nothing")
-            #     continue_solving = True
-            # else:
-            #     sum += board_sum
+            check_cols(board)
+            check_rows(board)
+            check_sub_squares(board)
+            check_cols_v2(board)
+            check_rows_v2(board)
 
-    for i in range(len(boards)):
-        board = boards[i]
-        result = solve_board_recursion(board, 0)
-        if result:
-            boards[i] = result
-            sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
+
+            if no_zeros(board):
+                sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
+            else:
+                continue_solving = True
+                if count == COUNT_LIMIT:
+                    print("adding nothing")
+      
+    # for i in range(len(boards)):
+    #     board = boards[i]
+    #     result = solve_board_recursion(board, 0)
+    #     if result:
+    #         boards[i] = result
+    #         sum += 100 * board[0][0] + 10 * board[0][1] + board[0][2]
     print(boards)
     return sum
 
@@ -38,8 +46,8 @@ def to_num(str):
     return int(str)
 
 def getSudokuBoards():
-    # text_file = open("96_sudoku.txt")
-    text_file = open("96_sudoku_2.txt")
+    text_file = open("96_sudoku.txt")
+    # text_file = open("96_sudoku_2.txt")
     arr = text_file.read().splitlines()
     text_file.close()
 
@@ -78,20 +86,20 @@ def solve_board(board):
                 return 0
     return 100 * board[0][0] + 10 * board[0][1] + board[0][2]
 
-def get_nums_that_can_be_placed(board, i, j):
-    if board[i][j] != 0:
+def get_nums_that_can_be_placed(board, i_arg, j_arg):
+    if board[i_arg][j_arg] != 0:
         return []
     nums = list(range(1, BOARD_SIZE + 1))
-    top_left_row = math.floor(i / 3)
-    top_left_col = math.floor(j / 3)
+    top_left_row = math.floor(i_arg / 3)
+    top_left_col = math.floor(j_arg / 3)
 
     for i in range(top_left_row, top_left_row + 3):
         for j in range(top_left_col, top_left_col + 3):
             if board[i][j] in nums:
                 nums.remove(board[i][j])
     
-    row = board[i]
-    col = get_column(board, j)
+    row = board[i_arg]
+    col = get_column(board, j_arg)
     for num in row:
         if num in nums:
             nums.remove(num)
@@ -99,6 +107,10 @@ def get_nums_that_can_be_placed(board, i, j):
     for num in col:
         if num in nums:
             nums.remove(num)
+
+    # print("get_nums_that_can_be_placed", i_arg, j_arg)
+    # print(nums)
+    # print(board)
 
     return nums
 
@@ -133,6 +145,35 @@ def check_rows(board):
                     cols.append(col)
             if len(cols) == 1:
                 board[row][cols[0]]= num
+
+def check_rows_v2(board):
+    for row in range(BOARD_SIZE):
+        num_to_indices = get_num_to_indices()
+        for col in range(BOARD_SIZE):
+            nums = get_nums_that_can_be_placed(board, row, col)
+            for num in nums:
+                num_to_indices[num].append([row, col])
+    
+        for num, indices in num_to_indices.items():
+            if len(indices) == 1:
+                row = indices[0][0]
+                col = indices[0][1]
+                board[row][col] = num
+
+def check_cols_v2(board):
+    for col in range(BOARD_SIZE):
+        num_to_indices = get_num_to_indices()   
+        for row in range(BOARD_SIZE):
+            nums = get_nums_that_can_be_placed(board, row, col)
+            for num in nums:
+                num_to_indices[num].append([row, col])
+    
+        for num, indices in num_to_indices.items():
+            if len(indices) == 1:
+                row = indices[0][0]
+                col = indices[0][1]
+                board[row][col] = num
+
 
 def check_cols(board):
     for col in range(BOARD_SIZE):
