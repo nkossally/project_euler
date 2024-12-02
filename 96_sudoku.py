@@ -3,15 +3,13 @@ import copy
 
 BOARD_SIZE = 9
 
-COUNT_LIMIT = 100
-
 def solve_sudoku_boards():
     boards = getSudokuBoards()
     sum = 0
       
     for i in range(len(boards)):
         board = boards[i]
-        result = solve_board_recursion(board, 0)
+        result = solve_board_recursion(board)
         if result:
             boards[i] = result
             sum += 100 * boards[i][0][0] + 10 * boards[i][0][1] + boards[i][0][2]
@@ -158,11 +156,9 @@ def check_sub_squares(board):
     return made_change
 
 
-def solve_board_recursion(board, count):
+def solve_board_recursion(board):
     if no_zeros(board):
         return board
-    if count > 300:
-        return False
 
     shortest  = float('inf')
     min_nums = None
@@ -185,7 +181,7 @@ def solve_board_recursion(board, count):
         new_board = copy.deepcopy(board)
         new_board[coordinates[0]][coordinates[1]] = num
         check_cols_rows_and_sub_squares(new_board)
-        result = solve_board_recursion(new_board, count + 1)
+        result = solve_board_recursion(new_board)
         if result:
             return result
         
