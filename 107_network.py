@@ -8,7 +8,8 @@ def get_minimal_network():
     sum = matrix_and_sum["sum"]
     print("initial sum", sum)
     min_sum = minimize_matrix(matrix, sum, 0, -1)
-    return min_sum
+    # each weight was counted twice so divide by 2
+    return (min_sum / 2)
 
 def get_matrix_and_sum():
     text_file = open("107_network.txt")
@@ -49,7 +50,6 @@ def test_num(idx, matrix):
 
 def minimize_matrix(matrix, sum, last_row, last_col):
     min_sum = sum
-    before = sum
     # print("sum", sum, "last_row", last_row, "last_col", last_col )
     for i in range(last_row, len(matrix)):
         row = matrix[i]
@@ -59,12 +59,10 @@ def minimize_matrix(matrix, sum, last_row, last_col):
                 if num != "-":
                     cpy = copy.deepcopy(matrix)
                     cpy[i][j] = "-"
+                    cpy[j][i] = "-"
                     if get_all_connected(cpy):
-                        other_sum = minimize_matrix(cpy, sum - num, i, j)
+                        other_sum = minimize_matrix(cpy, sum - 2 * num, i, j)
                         min_sum = min(min_sum, other_sum)
-
-    if min_sum <= 33000:
-        print(min_sum)
     
     return min_sum
 
