@@ -12,7 +12,7 @@ const getSetsOfPrimes = () => {
   const allSets = [];
 
   const helper = (primes, numsLeft, numStr) => {
-    if (numsLeft.length === 0 && numStr.length === 0) {
+    if (numsLeft.length === 0 && numStr.length === 0 && primes.length > 1) {
       allSets.push(primes);
       return;
     }
