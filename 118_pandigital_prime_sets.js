@@ -1,7 +1,7 @@
 const getIsprime = ( num) => {
   if (num === 1) return false;
   let i = 2;
-  while (i <= Math.floor(num / 2)) {
+  while (i <= Math.pow(num, .5)) {
     if (num % i === 0) return false;
     i++;
   }
@@ -19,8 +19,12 @@ const getSetsOfPrimes = () => {
 
     if (numStr) {
       const num = parseInt(numStr);
-      if (getIsprime(num)) {
-        helper([...primes, num], [...numsLeft], "");
+      const lastNum = primes.length > 0 ? primes[primes.length - 1] : undefined
+      const isLastNumSmaller = lastNum && lastNum < num
+      if(primes.length === 0 || isLastNumSmaller){
+        if (getIsprime(num)) {
+          helper([...primes, num], [...numsLeft], "");
+        }
       }
     }
 
@@ -32,6 +36,7 @@ const getSetsOfPrimes = () => {
 
   helper([], [1, 2, 3, 4, 5, 6, 7, 8, 9], "");
 
+  console.log(allSets)
   console.log(allSets.length)
   return allSets.length;
 };
